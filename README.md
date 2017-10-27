@@ -6,10 +6,12 @@ trying my hand at programming c# neural network.
 All the important stuff can be found at Assets/NeuralNetwork/Scripts
 
 the neural network has two scirpts
+
 NeuralNetwork.sc 
+
 Neuron.cs
 
-**Usage:
+**Usage:**
 
 **to create a neural network**
 
