@@ -7,6 +7,8 @@ public class NeuralNetwork{
 
     //List that contains a list of neurons this is the whole neural network
     private List<List<Neuron>> neuronlist = new List<List<Neuron>>();
+    //list of lists containing calculated results of neurons
+    private List<List<float>> layerResults = new List<List<float>>();
 
     //Constructor for neural network
     //inputs are pretty self explanatory
@@ -45,7 +47,8 @@ public class NeuralNetwork{
     //processes the neural network and returns a list of floats that contains the answers from the network
     public List<float> calculate(List<float> inputvalues, bool EnableVerbose = false)
     {
-        List<List<float>> layerResults = new List<List<float>>();
+        //clear layerresults list before doing things to it
+        layerResults.Clear();
 
         //initialize layerResults List
 
@@ -173,57 +176,71 @@ public class NeuralNetwork{
 
     public void train_backpropagation(List<List<float>> trainingdata, List<List<float>> desiredoutput,int epoch)
     {
-        /*
-        List<List<float>> layerResults = new List<List<float>>();
-
-
-        for (int i = 0; i < epoch; i++)
+        
+        //check that trainingdata and desired output lists have the same amount of values
+        if(trainingdata.Count == desiredoutput.Count)
         {
-            //###########################################forward propagation###########################################
-
-            //initialize layerResults List
-
-            for (int j = 0; j < neuronlist.Count; j++)
+            int j = 0;
+            while (j < epoch)
             {
-                layerResults.Add(new List<float>());
-            }
-
-            //is there correct amount of input values if not, return null
-            if (trainingdata[i].Count != neuronlist[0].Count)
-            {
-
-                Debug.Log("wrong number of inputs");
-                return;
-            }
-
-            int layer = 0;
-            int inputIndex = 0;
-            foreach (List<Neuron> neuronLayer in neuronlist)
-            {
-                foreach (Neuron neuron in neuronLayer)
+                j++;
+                //loop through the training data
+                for (int i = 0; i < trainingdata.Count; i++)
                 {
+                    //###########################################forward propagation###########################################
 
-                    //If first layer, add input values
-                    if (layer == 0)
+                    //calculate outputs of the network
+                    calculate(trainingdata[i]);
+
+                    //###########################################adjust the output layer error#################################
+
+                    //go through the output layer neurons and adjust their weights and biases
+                    int k = 0; //used to get the result of the right neuron
+                    foreach (Neuron neuron in neuronlist[neuronlist.Count - 1])
                     {
-                        layerResults[layer].Add(neuron.activate(trainingdata[i].));
-                        inputIndex++;
+                        neuron.error = sigmoidDerivative(neuron.output) * (desiredoutput[i][k] - neuron.output);
+                        k++;
+                        neuron.adjustWeights();
                     }
 
-                    else
+                    //###########################################adjust the hidden layers error#################################
+
+                    //go through all hidden layers neurons and adjust their weights and biases
+                    k = 0;
+                    for (int l = 0; l < neuronlist.Count - 1; l++)
                     {
-                        layerResults[layer].Add(neuron.activate(layerResults[layer - 1]));
+                        foreach (Neuron neuron in neuronlist[neuronlist.Count - 2 - l])
+                        {
+                            float weights = 0f;
+                            //calculate the sum of next layers weights affecting current neuron
+                            for (int m = 0; i < neuronlist[neuronlist.Count - 1 - l].Count; m++)
+                            {
+                                weights *= neuronlist[neuronlist.Count - 1 - l][m].weigths[k];
+                            }
+
+                            neuron.error = sigmoidDerivative(neuron.output) * weights;
+                            neuron.adjustWeights();
+                            k++;
+                        }
                     }
 
                 }
-                layer++;
             }
-            //###########################################back propagation###########################################
-
-            //###########################################Adjustments###########################################
+            
 
         }
-        */
+        //return if there is mismatch between trainingdata and desired results
+        else
+        {
+            Debug.Log("Traningdata & desiredoutput mismatch");
+            return;
+        }
+
+        
     }
 
+    private float sigmoidDerivative(float x)
+    {
+        return x*(1-x);
+    }
 }

@@ -8,6 +8,9 @@ public class tester : MonoBehaviour {
     List<float> results = new List<float>();
     private List<float> testvaules = new List<float>();
 
+    private List<List<float>> trainingdata = new List<List<float>>();
+    private List<List<float>> desiredOutput = new List<List<float>>();
+
     // Use this for initialization
     void Start () {
         for (int i = 0; i < 512; i++)

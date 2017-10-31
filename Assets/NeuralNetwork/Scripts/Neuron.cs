@@ -5,9 +5,11 @@ using UnityEngine;
 public class Neuron {
     
     private float bias;
-    private List<float> weigths = new List<float>(); 
+    public List<float> weigths = new List<float>();
+    private List<float> inputvalues = new List<float>();
     private int numberOfInputs = 0;
-    private float error = 0f;
+    public float error = 0f;
+    public float output = 0f;
     private bool isFirstLayer = false;
 
     //Constructor for Neuron
@@ -50,6 +52,8 @@ public class Neuron {
     //Activation function for list input
     public float activate(List<float> inputs)
     {
+        inputvalues.Clear();
+        inputvalues = inputs;
         //calculate sum of inputs multiplied by weights
         float inputSum = 0;
         for (int i = 0; i < numberOfInputs; i++)
@@ -64,7 +68,8 @@ public class Neuron {
     //Activation function for single float input
     public float activate(float input)
     {
-        return 1 / (1 + Mathf.Exp(input*weigths[0] - bias));
+        output = 1 / (1 + Mathf.Exp(input * weigths[0] - bias)); ;
+        return output;
     }
 
 
@@ -78,6 +83,16 @@ public class Neuron {
             }
         }
 
+    }
+
+    public void adjustWeights()
+    {
+        for (int i = 0; i < weigths.Count; i++)
+        {
+            weigths[i] += error * inputvalues[i];
+        }
+        bias += error;
+        return;
     }
 
     // gaussian distribution with mean 0 and variance 1
