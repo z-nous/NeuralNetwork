@@ -9,6 +9,7 @@ public class NeuralNetwork{
     private List<List<Neuron>> neuronlist = new List<List<Neuron>>();
     //list of lists containing calculated results of neurons
     private List<List<float>> layerResults = new List<List<float>>();
+    private float totalError = 0f;
 
     //Constructor for neural network
     //inputs are pretty self explanatory
@@ -174,7 +175,7 @@ public class NeuralNetwork{
         return structure;
     }
 
-    public void train_backpropagation(List<List<float>> trainingdata, List<List<float>> desiredoutput,int epoch)
+    public void train_backpropagation(List<List<float>> trainingdata, List<List<float>> desiredoutput,int epoch,float trainingspeed = 1f)
     {
         
         //check that trainingdata and desired output lists have the same amount of values
@@ -191,43 +192,61 @@ public class NeuralNetwork{
 
                     //calculate outputs of the network
                     calculate(trainingdata[i]);
+                   
 
-                    //###########################################adjust the output layer error#################################
+                    //###########################################adjust the output layer weights#################################
 
                     //go through the output layer neurons and adjust their weights and biases
                     int k = 0; //used to get the result of the right neuron
                     foreach (Neuron neuron in neuronlist[neuronlist.Count - 1])
                     {
-                        neuron.error = sigmoidDerivative(neuron.output) * (desiredoutput[i][k] - neuron.output);
-                        k++;
+                        //Debug.Log("neuroninfo");
+                        //Debug.Log("neuron error " + neuron.error);
+                        //Debug.Log("neuron output " + neuron.output);
+                        neuron.error = (sigmoidDerivative(neuron.output) * (desiredoutput[i][k] - neuron.output)) * trainingspeed;
                         neuron.adjustWeights();
+                        k++;
                     }
-
-                    //###########################################adjust the hidden layers error#################################
+                    
+                    //###########################################adjust the hidden layers weights#################################
 
                     //go through all hidden layers neurons and adjust their weights and biases
+                    
                     k = 0;
-                    for (int l = 0; l < neuronlist.Count - 1; l++)
+                    //Debug.Log(neuronlist.Count - 3);
+                    for (int l = 0; l < neuronlist.Count - 2; l++)
                     {
                         foreach (Neuron neuron in neuronlist[neuronlist.Count - 2 - l])
                         {
-                            float weights = 0f;
-                            //calculate the sum of next layers weights affecting current neuron
-                            for (int m = 0; i < neuronlist[neuronlist.Count - 1 - l].Count; m++)
+                            float weights = 1f;
+
+                            //*calculate the sum of next layers weights affecting current neuron
+                            foreach (Neuron neuron2 in neuronlist[neuronlist.Count - 1 - l])
                             {
-                                weights *= neuronlist[neuronlist.Count - 1 - l][m].weigths[k];
+                                //Debug.Log(neuron2.weigths[k]);
+                                weights = weights * neuron2.weigths[k];
                             }
 
-                            neuron.error = sigmoidDerivative(neuron.output) * weights;
+                            neuron.error = (sigmoidDerivative(neuron.output) * weights)*trainingspeed;
                             neuron.adjustWeights();
                             k++;
+                            
                         }
+                        k = 0;
                     }
 
                 }
             }
-            
-
+            //####################################################calulate network total error##########################################
+            calculate(trainingdata[0]);
+            totalError = 0f;
+            int f = 0;
+            foreach (Neuron neuron in neuronlist[neuronlist.Count - 1])
+            {
+                totalError += neuron.output + layerResults[neuronlist.Count - 1][f];
+                f++;
+            }
+            //Debug.Log("Network total error " + totalError);
         }
         //return if there is mismatch between trainingdata and desired results
         else

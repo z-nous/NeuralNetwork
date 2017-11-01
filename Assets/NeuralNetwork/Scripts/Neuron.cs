@@ -62,7 +62,8 @@ public class Neuron {
         }
 
         //return sigmoid function value
-        return 1 / (1 + Mathf.Exp(inputSum - bias));
+        output = 1 / (1 + Mathf.Exp(inputSum - bias));
+        return output;
     }
 
     //Activation function for single float input
@@ -87,7 +88,8 @@ public class Neuron {
 
     public void adjustWeights()
     {
-        for (int i = 0; i < weigths.Count; i++)
+        //Debug.Log(error);
+        for (int i = 0; i < weigths.Count - 1; i++)
         {
             weigths[i] += error * inputvalues[i];
         }
