@@ -5,17 +5,17 @@ using UnityEngine;
 public class tester : MonoBehaviour {
 
     private NeuralNetwork testNetwork;
-    //private List<float> results = new List<float>();
+    //private List<double> results = new List<double>();
 
-    private List<List<float>> trainingdata = new List<List<float>>();
-    private List<List<float>> desiredOutput = new List<List<float>>();
+    private List<List<double>> trainingdata = new List<List<double>>();
+    private List<List<double>> desiredOutput = new List<List<double>>();
 
-    private List<float> testdata11 = new List<float>();
-    private List<float> testdata00 = new List<float>();
+    private List<double> testdata11 = new List<double>();
+    private List<double> testdata00 = new List<double>();
 
     // Use this for initialization
     void Start () {
-        testNetwork = new NeuralNetwork(2, 1, 5);
+        testNetwork = new NeuralNetwork(2, 1, 2);
 
         //Construct trainingdata for AND gate
         constructTrainingData();
@@ -23,6 +23,16 @@ public class tester : MonoBehaviour {
         //test network
         print("network structure: ");
         testNetwork.getNetworkStructure(true);
+
+        //print testdata
+        for (int i = 0; i < trainingdata.Count; i++)
+        {
+            print("input:");
+            print( trainingdata[i][0]);
+            print(trainingdata[i][1]);
+            print("output should be");
+            print(desiredOutput[i][0]);
+        }
     }
 	
 	// Update is called once per frame
@@ -31,7 +41,8 @@ public class tester : MonoBehaviour {
         {
             //mixTraingindata();
             print("starting training");
-            testNetwork.train_backpropagation(trainingdata, desiredOutput, 5000,1f);
+            double error = testNetwork.train_backpropagation(trainingdata, desiredOutput, 5000, 10f);
+            print("Total error after training: " + error);
             print("training finished");
             print("results for 0 0 : " + testNetwork.calculate(trainingdata[0])[0] + " should be 0");
             print("results for 0 1 : " + testNetwork.calculate(trainingdata[1])[0] + " should be 1");
@@ -48,29 +59,29 @@ public class tester : MonoBehaviour {
 
     private void constructTrainingData()
     {
-        trainingdata.Add(new List<float>());
-        desiredOutput.Add(new List<float>());
+        trainingdata.Add(new List<double>());
+        desiredOutput.Add(new List<double>());
         trainingdata[0].Add(0f);
         trainingdata[0].Add(0f);
         desiredOutput[0].Add(0f);
         //desiredOutput[0].Add(0f);
 
-        trainingdata.Add(new List<float>());
-        desiredOutput.Add(new List<float>());
+        trainingdata.Add(new List<double>());
+        desiredOutput.Add(new List<double>());
         trainingdata[1].Add(1f);
         trainingdata[1].Add(0f);
         desiredOutput[1].Add(1f);
         //desiredOutput[1].Add(0f);
 
-        trainingdata.Add(new List<float>());
-        desiredOutput.Add(new List<float>());
+        trainingdata.Add(new List<double>());
+        desiredOutput.Add(new List<double>());
         trainingdata[2].Add(0f);
         trainingdata[2].Add(1f);
         desiredOutput[2].Add(1f);
         //desiredOutput[2].Add(1f);
 
-        trainingdata.Add(new List<float>());
-        desiredOutput.Add(new List<float>());
+        trainingdata.Add(new List<double>());
+        desiredOutput.Add(new List<double>());
         trainingdata[3].Add(1f);
         trainingdata[3].Add(1f);
         desiredOutput[3].Add(0f);
@@ -81,7 +92,7 @@ public class tester : MonoBehaviour {
     {
         for (int i = 0; i < trainingdata.Count; i++)
         {
-            List<float> temp = trainingdata[i];
+            List<double> temp = trainingdata[i];
             int randomindex = Random.Range(i, trainingdata.Count);
             trainingdata[i] = trainingdata[randomindex];
             trainingdata[randomindex] = temp;

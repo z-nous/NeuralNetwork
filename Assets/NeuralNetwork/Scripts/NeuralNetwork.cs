@@ -1,15 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using System;
 
 public class NeuralNetwork{
 
     //List that contains a list of neurons this is the whole neural network
     private List<List<Neuron>> neuronlist = new List<List<Neuron>>();
     //list of lists containing calculated results of neurons
-    private List<List<float>> layerResults = new List<List<float>>();
-    private float totalError = 0f;
+    private List<List<double>> layerResults = new List<List<double>>();
+    private double totalError = 0f;
 
     //Constructor for neural network
     //inputs are pretty self explanatory
@@ -45,8 +45,8 @@ public class NeuralNetwork{
     }
 
 
-    //processes the neural network and returns a list of floats that contains the answers from the network
-    public List<float> calculate(List<float> inputvalues, bool EnableVerbose = false)
+    //processes the neural network and returns a list of doubles that contains the answers from the network
+    public List<double> calculate(List<double> inputvalues, bool EnableVerbose = false)
     {
         //clear layerresults list before doing things to it
         layerResults.Clear();
@@ -55,7 +55,7 @@ public class NeuralNetwork{
 
         for (int j = 0; j < neuronlist.Count; j++)
         {
-            layerResults.Add(new List<float>());
+            layerResults.Add(new List<double>());
         }
 
         //is there correct amount of input values if not, return null
@@ -97,10 +97,10 @@ public class NeuralNetwork{
         if(EnableVerbose == true)
         {
             int index = 0;
-            foreach (List<float> layerlist in layerResults)
+            foreach (List<double> layerlist in layerResults)
             {
                 Debug.Log("Layer " + index + " results");
-                foreach (float neuronvalue in layerlist)
+                foreach (double neuronvalue in layerlist)
                 {
                     Debug.Log(neuronvalue);
                 }
@@ -128,14 +128,14 @@ public class NeuralNetwork{
     //weightstomutate = what percentage of neurons weights are to be mutated
     //variance = how much to change the values. for example if 0.5 is given, a value can go higher or lower by that amount
     //if given the values neuronstomutate = 0.1, weightstomutate = 0.1 and variance 0.1 = 10 percent of neurons are going through mutation and 10 percent of their weights are mutated by +- 0.1
-    public void mutateNetwork(float neuronstomutate,float weightstomutate, float variance)
+    public void mutateNetwork(double neuronstomutate,double weightstomutate, double variance)
     {
         //Loop through all neurons
         foreach (List<Neuron> neuronlayer in neuronlist)
         {
             foreach (Neuron neuron in neuronlayer)
             {
-                if (Random.Range(0f, 1f) <= neuronstomutate)
+                if (UnityEngine.Random.Range(0f, 1f) <= neuronstomutate)
                 {
                     neuron.mutate(weightstomutate, variance);
                 }
@@ -175,7 +175,7 @@ public class NeuralNetwork{
         return structure;
     }
 
-    public void train_backpropagation(List<List<float>> trainingdata, List<List<float>> desiredoutput,int epoch,float trainingspeed = 1f)
+    public double train_backpropagation(List<List<double>> trainingdata, List<List<double>> desiredoutput,int epoch,double trainingspeed = 1f)
     {
         
         //check that trainingdata and desired output lists have the same amount of values
@@ -218,7 +218,7 @@ public class NeuralNetwork{
                     {
                         foreach (Neuron neuron in neuronlist[neuronlist.Count - 2 - l])
                         {
-                            float weights = 1f;
+                            double weights = 1f;
 
                             //*calculate the sum of next layers weights affecting current neuron
                             foreach (Neuron neuron2 in neuronlist[neuronlist.Count - 1 - l])
@@ -237,28 +237,30 @@ public class NeuralNetwork{
 
                 }
             }
-            //####################################################calulate network total error##########################################
-            calculate(trainingdata[0]);
-            totalError = 0f;
+            //####################################################calulate network squared errorr##########################################
+            calculate(trainingdata[1]);
+            totalError = 0;
             int f = 0;
             foreach (Neuron neuron in neuronlist[neuronlist.Count - 1])
             {
-                totalError += neuron.output + layerResults[neuronlist.Count - 1][f];
+                //Debug.Log(Mathf.Pow(0.5f * (trainingdata[1][f] - neuron.output), 2f));
+                totalError += (Math.Exp(0.5 * (trainingdata[1][f] - neuron.output)));
                 f++;
             }
-            //Debug.Log("Network total error " + totalError);
+
+            Debug.Log("Network total error " + totalError);
         }
         //return if there is mismatch between trainingdata and desired results
         else
         {
             Debug.Log("Traningdata & desiredoutput mismatch");
-            return;
+            return 1.0;
         }
 
-        
+        return totalError;
     }
 
-    private float sigmoidDerivative(float x)
+    private double sigmoidDerivative(double x)
     {
         return x*(1-x);
     }
