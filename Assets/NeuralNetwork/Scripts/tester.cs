@@ -15,7 +15,7 @@ public class tester : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        testNetwork = new NeuralNetwork(2, 1, 2);
+        testNetwork = new NeuralNetwork(2, 1, 3);
 
         //Construct trainingdata for AND gate
         constructTrainingData();
@@ -33,6 +33,7 @@ public class tester : MonoBehaviour {
             print("output should be");
             print(desiredOutput[i][0]);
         }
+
     }
 	
 	// Update is called once per frame
@@ -41,18 +42,33 @@ public class tester : MonoBehaviour {
         {
             //mixTraingindata();
             print("starting training");
-            double error = testNetwork.train_backpropagation(trainingdata, desiredOutput, 5000, 10f);
+            double error = testNetwork.train_backpropagation(trainingdata, desiredOutput, 1, 1f);
             print("Total error after training: " + error);
             print("training finished");
             print("results for 0 0 : " + testNetwork.calculate(trainingdata[0])[0] + " should be 0");
-            print("results for 0 1 : " + testNetwork.calculate(trainingdata[1])[0] + " should be 1");
-            print("results for 1 0 : " + testNetwork.calculate(trainingdata[2])[0] + " should be 1");
-            print("results for 1 1 : " + testNetwork.calculate(trainingdata[3])[0] + " should be 0");
+            print("results for 0 1 : " + testNetwork.calculate(trainingdata[1])[0] + " should be 0");
+            print("results for 1 0 : " + testNetwork.calculate(trainingdata[2])[0] + " should be 0");
+            print("results for 1 1 : " + testNetwork.calculate(trainingdata[3])[0] + " should be 1");
         }
         
-        if (Input.GetKey("r"))
+        if (Input.GetKeyDown("m"))
+        {
+            testNetwork.mutateNetwork(0.5,0.5,1.0);
+            print("Mutated");
+        }
+        if (Input.GetKeyDown("r"))
         {
             testNetwork.randomize();
+            print("randomized");
+        }
+        if (Input.GetKeyDown("g"))
+        {
+            testNetwork.getNetworkStructure(true);
+        }
+        if (Input.GetKeyDown("c"))
+        {
+            print(testNetwork.calculate(trainingdata[0])[0]);
+            print(testNetwork.calculate(trainingdata[1])[0]);
         }
 
     }
@@ -70,21 +86,21 @@ public class tester : MonoBehaviour {
         desiredOutput.Add(new List<double>());
         trainingdata[1].Add(1f);
         trainingdata[1].Add(0f);
-        desiredOutput[1].Add(1f);
+        desiredOutput[1].Add(0f);
         //desiredOutput[1].Add(0f);
 
         trainingdata.Add(new List<double>());
         desiredOutput.Add(new List<double>());
         trainingdata[2].Add(0f);
         trainingdata[2].Add(1f);
-        desiredOutput[2].Add(1f);
+        desiredOutput[2].Add(0f);
         //desiredOutput[2].Add(1f);
 
         trainingdata.Add(new List<double>());
         desiredOutput.Add(new List<double>());
         trainingdata[3].Add(1f);
         trainingdata[3].Add(1f);
-        desiredOutput[3].Add(0f);
+        desiredOutput[3].Add(1f);
         //desiredOutput[3].Add(1f);
     }
 

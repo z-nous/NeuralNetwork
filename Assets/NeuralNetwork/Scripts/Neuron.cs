@@ -1,11 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class Neuron {
     
-    private double bias;
+    public double bias;
     public List<double> weigths = new List<double>();
     private List<double> inputvalues = new List<double>();
     private int numberOfInputs = 0;
@@ -21,34 +20,17 @@ public class Neuron {
 
         isFirstLayer = isfirstlayer;
         //randomize bias for the neuron
-        if (isFirstLayer == false) bias = NextGaussian();
+        if (isFirstLayer == false) bias = gaussian.NextGaussian();
         else bias = 0;
         numberOfInputs = numberofinputs;
 
         //Randomize wieghts
         for (int i = 0; i < numberofinputs; i++)
         {
-            weigths.Add(NextGaussian());
+            weigths.Add(gaussian.NextGaussian());
         }
     }
 
-    //used to randomizes all neuron values
-    public void randomize()
-    {
-        //If there are weights, randomize them
-        if(weigths.Count > 0)
-        {
-            for (int i = 0; i < weigths.Count; i++)
-            {
-                weigths[i] = NextGaussian();
-            }
-        }
-
-        //randomize bias
-        if (isFirstLayer == false) bias = NextGaussian();
-        else bias = 0;
-
-    }
 
     //Activation function for list input
     public double activate(List<double> inputs)
@@ -63,34 +45,20 @@ public class Neuron {
         }
 
         //return sigmoid function value
-        output = 1.0 / (1.0 + Math.Exp(inputSum - bias));
+        output = sigmoid.output(inputSum + bias);
         return output;
     }
 
     //Activation function for single double input
     public double activate(double input)
     {
-        output = 1 / (1 + Math.Exp(input * weigths[0] - bias)); ;
+        output = sigmoid.output(input * weigths[0] + bias);
         return output;
-    }
-
-
-    public void mutate(double amounttomutate, double variance)
-    {
-        for (int i = 0; i < weigths.Count; i++)
-        {
-            if (UnityEngine.Random.Range(0f, 1f) < amounttomutate)
-            {
-                
-                weigths[i] += UnityEngine.Random.Range((float)-variance, (float)variance);
-            }
-        }
-
     }
 
     public void adjustWeights()
     {
-        //Debug.Log(error);
+        
         for (int i = 0; i < weigths.Count - 1; i++)
         {
             weigths[i] += error * inputvalues[i];
@@ -99,20 +67,34 @@ public class Neuron {
         return;
     }
 
-    // gaussian distribution with mean 0 and variance 1
-    //Source https://www.alanzucconi.com/2015/09/16/how-to-sample-from-a-gaussian-distribution/
-    private static double NextGaussian()
+    //used to randomizes all neuron values
+    public void randomize()
     {
-        double v1, v2, s;
-        do
+        //If there are weights, randomize them
+        if (weigths.Count > 0)
         {
-            v1 = 2.0f * UnityEngine.Random.Range(0f, 1f) - 1.0f;
-            v2 = 2.0f * UnityEngine.Random.Range(0f, 1f) - 1.0f;
-            s = v1 * v1 + v2 * v2;
-        } while (s >= 1.0f || s == 0f);
+            for (int i = 0; i < weigths.Count; i++)
+            {
+                weigths[i] = gaussian.NextGaussian();
+            }
+        }
 
-        s = Math.Sqrt((-2.0f * Math.Log(s)) / s);
+        //randomize bias
+        if (isFirstLayer == false) bias = gaussian.NextGaussian();
+        else bias = 0;
 
-        return v1 * s;
+    }
+
+    public void mutate(double amounttomutate, double variance)
+    {
+        for (int i = 0; i < weigths.Count; i++)
+        {
+            if (UnityEngine.Random.Range(0f, 1f) < amounttomutate)
+            {
+
+                weigths[i] += UnityEngine.Random.Range((float)-variance, (float)variance);
+            }
+        }
+
     }
 }
